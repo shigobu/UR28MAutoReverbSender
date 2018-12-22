@@ -9,7 +9,7 @@
     <StackPanel Margin="5">
         <StackPanel Orientation="Horizontal">
             <TextBlock Text="MIDIIN" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
-            <ComboBox x:Name="midiInCom" Margin="3" Width="100"/>
+            <ComboBox x:Name="midiInCom" Margin="3" Width="120"/>
             <Button Content="更新" x:Name="midiInButton" Margin="3"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
