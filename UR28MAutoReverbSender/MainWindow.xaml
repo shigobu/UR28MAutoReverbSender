@@ -5,8 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UR28MAutoReverbSender"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        Title="UR28M自動リバーブ" SizeToContent="WidthAndHeight" ResizeMode="NoResize" Loaded="Window_Loaded">
+    <StackPanel Margin="5">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="MIDIIN" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
+            <ComboBox x:Name="midiInCom" Margin="3" Width="100"/>
+            <Button Content="更新" x:Name="midiInButton" Margin="3"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="NoteNumber" Margin="3" TextAlignment="Center" VerticalAlignment="Center"/>
+            <TextBox x:Name="noteNum" Width="60" Margin="3"/>
+        </StackPanel>
+    </StackPanel>
 </Window>
