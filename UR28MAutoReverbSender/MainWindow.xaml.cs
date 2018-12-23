@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -43,6 +44,12 @@ namespace UR28MAutoReverbSender
         Point OnPoint = new Point(40, 200);
         Point OffPoint = new Point(24, 210);
 
+		const int MIDIChannel = 0;
+		CancellationTokenSource tokenSource = null;
+		CancellationToken token;
+
+		Task MIDIMessageLoop = null;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -50,9 +57,6 @@ namespace UR28MAutoReverbSender
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            midiInCom.ItemsSource = midiInDeviceEnum();
-            midiInCom.SelectedIndex = 0;
-
             string processName = "dspMixFx_UR28M";
             Process[] pros = Process.GetProcessesByName(processName);
             foreach (var item in pros)
@@ -67,13 +71,96 @@ namespace UR28MAutoReverbSender
                 return;
             }
             handle = pro.MainWindowHandle;
-        }
+
+            //MIDIデバイスの名前取得
+            midiInCom.ItemsSource = midiInDeviceEnum();
+            midiInCom.SelectedIndex = 0;
+		}
 
         /// <summary>
-        /// すべてのMIDIInデバイスの名前を取得します。
+        /// MIDIメッセージを取得するスレッド
         /// </summary>
-        /// <returns></returns>
-        private string[] midiInDeviceEnum()
+        private void MIDILoadThread()
+        {
+			MIDIIN midiIn = null;
+			try
+			{
+				midiIn = new MIDIIN(GetSelectedDeviceName());
+				while (!token.IsCancellationRequested)
+				{
+					byte[] message = midiIn.GetMIDIMessage();
+					if (message.Length == 0)
+					{
+						Thread.Sleep(1);
+						continue;
+					}
+					switch (message[0])
+					{
+						//ノートオン
+						case 0x90 + MIDIChannel:
+							//数値変換
+							int b_noteNum = 0;
+							if(int.TryParse(noteNum.Text, out b_noteNum))
+							{
+								//指定の音階の場合
+								if (message[1] == b_noteNum)
+								{
+									ReverbOn();
+								}
+							}
+							break;
+						//ノートオフ
+						case 0x80 + MIDIChannel:
+							//数値変換
+							if (int.TryParse(noteNum.Text, out b_noteNum))
+							{
+								//指定の音階の場合
+								if (message[1] == b_noteNum)
+								{
+									ReverbOff();
+								}
+							}
+							break;
+						default:
+							break;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+
+				throw;
+			}
+			finally
+			{
+				if (midiIn != null)
+				{
+					midiIn.Dispose();
+				}
+			}
+        }
+
+		/// <summary>
+		/// 選択されているデバイス名を取得します。
+		/// </summary>
+		/// <returns></returns>
+		private string GetSelectedDeviceName()
+		{
+			if (midiInCom.Dispatcher.CheckAccess())
+			{
+				return midiInCom.Text;
+			}
+			else
+			{
+				return midiInCom.Dispatcher.Invoke<string>(new Func<string>(GetSelectedDeviceName));
+			}
+		}
+
+		/// <summary>
+		/// すべてのMIDIInデバイスの名前を取得します。
+		/// </summary>
+		/// <returns></returns>
+		private string[] midiInDeviceEnum()
         {
             List<string> names = new List<string>();
             int inNum = MIDIIN.GetDeviceNum();
@@ -98,10 +185,11 @@ namespace UR28MAutoReverbSender
             }
 
             Microsoft.VisualBasic.Interaction.AppActivate(pro.Id);
-            System.Threading.Thread.Sleep(100);
+			Thread.Sleep(100);
 
             SetCursorPos(rect.Left + (int)OnPoint.X, rect.Top + (int)OnPoint.Y);
             mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+			Thread.Sleep(50);
             mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
         }
 
@@ -119,16 +207,62 @@ namespace UR28MAutoReverbSender
             }
 
             Microsoft.VisualBasic.Interaction.AppActivate(pro.Id);
-            System.Threading.Thread.Sleep(100);
+			Thread.Sleep(100);
 
             SetCursorPos(rect.Left + (int)OffPoint.X, rect.Top + (int)OffPoint.Y);
             mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+			Thread.Sleep(50);
             mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
         }
 
-    }
+		private void DoButton_Click(object sender, RoutedEventArgs e)
+		{
+			//別スレッドを起動し、MIDIメッセージの読み込みを開始します。
+			//有効無効切り替え
+			doButton.IsEnabled = false;
+			midiInCom.IsEnabled = false;
+			midiInButton.IsEnabled = false;
+			noteNum.IsEnabled = false;
 
-    [StructLayout(LayoutKind.Sequential)]
+			//スレッド開始
+			tokenSource = new CancellationTokenSource();
+			token = tokenSource.Token;
+			MIDIMessageLoop = Task.Run(new Action(MIDILoadThread), token);
+			while (!(MIDIMessageLoop.Status == TaskStatus.Running))
+			{
+				Thread.Sleep(1);
+			}
+			stopButton.IsEnabled = true;
+		}
+
+		private void StopButton_Click(object sender, RoutedEventArgs e)
+		{
+			//有効無効切り替え
+			stopButton.IsEnabled = false;
+			tokenSource.Cancel();
+			while (MIDIMessageLoop.Status == TaskStatus.Running)
+			{
+				Thread.Sleep(1);
+			}
+
+			MIDIMessageLoop.Dispose();
+			MIDIMessageLoop = null;
+
+			doButton.IsEnabled = true;
+			midiInCom.IsEnabled = true;
+			midiInButton.IsEnabled = true;
+			noteNum.IsEnabled =	true;
+		}
+
+		private void MidiInButton_Click(object sender, RoutedEventArgs e)
+		{
+			//MIDIデバイスの名前取得
+			midiInCom.ItemsSource = midiInDeviceEnum();
+			midiInCom.SelectedIndex = 0;
+		}
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
     public struct RECT
     {
         public int Left;        // x position of upper-left corner
