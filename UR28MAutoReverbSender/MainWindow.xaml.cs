@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -98,27 +100,18 @@ namespace UR28MAutoReverbSender
 					{
 						//ノートオン
 						case 0x90 + MIDIChannel:
-							//数値変換
-							int b_noteNum = 0;
-							if(int.TryParse(noteNum.Text, out b_noteNum))
+							//指定の音階の場合
+							if (message[1] == GetNoteNumber())
 							{
-								//指定の音階の場合
-								if (message[1] == b_noteNum)
-								{
-									ReverbOn();
-								}
+								ReverbOn();
 							}
 							break;
 						//ノートオフ
 						case 0x80 + MIDIChannel:
-							//数値変換
-							if (int.TryParse(noteNum.Text, out b_noteNum))
+							//指定の音階の場合
+							if (message[1] == GetNoteNumber())
 							{
-								//指定の音階の場合
-								if (message[1] == b_noteNum)
-								{
-									ReverbOff();
-								}
+								ReverbOff();
 							}
 							break;
 						default:
@@ -128,7 +121,7 @@ namespace UR28MAutoReverbSender
 			}
 			catch (Exception ex)
 			{
-
+				stopButton.PerformClick();
 				throw;
 			}
 			finally
@@ -153,6 +146,24 @@ namespace UR28MAutoReverbSender
 			else
 			{
 				return midiInCom.Dispatcher.Invoke<string>(new Func<string>(GetSelectedDeviceName));
+			}
+		}
+
+		/// <summary>
+		/// 入力されているノート番号を取得します。
+		/// </summary>
+		/// <returns></returns>
+		private int GetNoteNumber()
+		{
+			if (noteNum.Dispatcher.CheckAccess())
+			{
+				int num = 0;
+				int.TryParse(noteNum.Text, out num);
+				return num;
+			}
+			else
+			{
+				return noteNum.Dispatcher.Invoke<int>(new Func<int>(GetNoteNumber));
 			}
 		}
 
@@ -270,4 +281,23 @@ namespace UR28MAutoReverbSender
         public int Right;       // x position of lower-right corner
         public int Bottom;      // y position of lower-right corner
     }
+
+	/// <summary>
+	/// ボタンの拡張
+	/// </summary>
+	public static class ButtonExtensions
+	{
+		/// <summary>
+		/// ボタンのクリックイベントを発生させます。
+		/// </summary>
+		/// <param name="button"></param>
+		public static void PerformClick(this Button button)
+		{
+			if (button == null)
+				throw new ArgumentNullException("button");
+
+			var provider = new ButtonAutomationPeer(button) as IInvokeProvider;
+			provider.Invoke();
+		}
+	}
 }
