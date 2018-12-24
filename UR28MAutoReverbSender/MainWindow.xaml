@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UR28MAutoReverbSender"
         mc:Ignorable="d"
-        Title="UR28M自動リバーブ" SizeToContent="WidthAndHeight" ResizeMode="NoResize" Loaded="Window_Loaded">
+        Title="UR28M自動リバーブ" SizeToContent="WidthAndHeight" ResizeMode="NoResize" Loaded="Window_Loaded" Icon="icons/icon.ico">
     <StackPanel Margin="5">
         <StackPanel Orientation="Horizontal">
             <TextBlock Text="MIDIIN" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>

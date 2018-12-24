@@ -113,8 +113,8 @@ namespace UR28MAutoReverbSender
 			}
 			catch (Exception ex)
 			{
-				stopButton.PerformClick();
 				MessageBox.Show(ex.Message);
+				stopButton.PerformClick();
 			}
 			finally
 			{
