@@ -183,8 +183,7 @@ namespace UR28MAutoReverbSender
 			bool err = GetWindowRect(handle, out rect);
 			if (!err)
 			{
-				MessageBox.Show("dspMixFx_UR28Mの場所を取得できませんでした。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
-				return;
+				throw new Exception("dspMixFx_UR28Mの場所を取得できませんでした。");
 			}
 
 			Microsoft.VisualBasic.Interaction.AppActivate(pro.Id);
@@ -205,8 +204,7 @@ namespace UR28MAutoReverbSender
 			bool err = GetWindowRect(handle, out rect);
 			if (!err)
 			{
-				MessageBox.Show("dspMixFx_UR28Mの場所を取得できませんでした。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
-				return;
+				throw new Exception("dspMixFx_UR28Mの場所を取得できませんでした。");
 			}
 
 			Microsoft.VisualBasic.Interaction.AppActivate(pro.Id);
