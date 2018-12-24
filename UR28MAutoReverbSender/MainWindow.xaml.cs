@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace UR28MAutoReverbSender
 {
@@ -113,8 +114,7 @@ namespace UR28MAutoReverbSender
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message);
-				stopButton.PerformClick();
+				MessageBox.Show(ex.Message + "\n終了ボタンを押してください。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
 			}
 			finally
 			{
@@ -188,11 +188,11 @@ namespace UR28MAutoReverbSender
 			}
 
 			Microsoft.VisualBasic.Interaction.AppActivate(pro.Id);
-			Thread.Sleep(100);
+			Thread.Sleep(30);
 
 			SetCursorPos(rect.Left + (int)OnPoint.X, rect.Top + (int)OnPoint.Y);
 			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-			Thread.Sleep(50);
+			Thread.Sleep(30);
 			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 		}
 
@@ -210,11 +210,11 @@ namespace UR28MAutoReverbSender
 			}
 
 			Microsoft.VisualBasic.Interaction.AppActivate(pro.Id);
-			Thread.Sleep(100);
+			Thread.Sleep(30);
 
 			SetCursorPos(rect.Left + (int)OffPoint.X, rect.Top + (int)OffPoint.Y);
 			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-			Thread.Sleep(50);
+			Thread.Sleep(30);
 			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 		}
 
