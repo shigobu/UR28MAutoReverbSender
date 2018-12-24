@@ -141,6 +141,12 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="icons\icon.ico" />
+    <Resource Include="icons\icon1.png" />
+    <Resource Include="icons\icon2.bmp" />
+    <Resource Include="icons\icon3.bmp" />
+    <Resource Include="icons\icon4.bmp" />
+    <Resource Include="icons\icon5.bmp" />
     <Content Include="MIDIIO.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
