@@ -60,7 +60,7 @@ namespace UR28MAutoReverbSender
 			}
 			if (pro == null)
 			{
-				MessageBox.Show("dspMixFx_UR28Mのウィンドウを取得できませんでした。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+				MessageBox.Show("dspMixFx_UR28Mのウィンドウを取得できませんでした。\n終了します。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
 				this.Close();
 				return;
 			}
@@ -114,7 +114,10 @@ namespace UR28MAutoReverbSender
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message + "\n終了ボタンを押してください。", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+				//有効無効切り替え
+				SetEnableEnd(false);
+				SetEnableStart(true);
+				MessageBox.Show(ex.Message, "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
 			}
 			finally
 			{
@@ -183,7 +186,7 @@ namespace UR28MAutoReverbSender
 			bool err = GetWindowRect(handle, out rect);
 			if (!err)
 			{
-				throw new Exception("dspMixFx_UR28Mの場所を取得できませんでした。");
+				throw new Exception("dspMixFx_UR28Mの場所を取得できませんでした。\n「dspMixFx_UR28M」を起動してください。");
 			}
 
 			Microsoft.VisualBasic.Interaction.AppActivate(pro.Id);
@@ -204,7 +207,7 @@ namespace UR28MAutoReverbSender
 			bool err = GetWindowRect(handle, out rect);
 			if (!err)
 			{
-				throw new Exception("dspMixFx_UR28Mの場所を取得できませんでした。");
+				throw new Exception("dspMixFx_UR28Mの場所を取得できませんでした。\n「dspMixFx_UR28M」を起動してください。");
 			}
 
 			Microsoft.VisualBasic.Interaction.AppActivate(pro.Id);
@@ -239,7 +242,7 @@ namespace UR28MAutoReverbSender
 		private void StopButton_Click(object sender, RoutedEventArgs e)
 		{
 			//有効無効切り替え
-			stopButton.IsEnabled = false;
+			SetEnableEnd(false);
 			tokenSource.Cancel();
 			while (MIDIMessageLoop.Status == TaskStatus.Running)
 			{
@@ -249,10 +252,42 @@ namespace UR28MAutoReverbSender
 			MIDIMessageLoop.Dispose();
 			MIDIMessageLoop = null;
 
-			doButton.IsEnabled = true;
-			midiInCom.IsEnabled = true;
-			midiInButton.IsEnabled = true;
-			noteNum.IsEnabled = true;
+			SetEnableStart(true);
+		}
+
+		/// <summary>
+		/// 開始ボタンの有効無効を変更します。
+		/// </summary>
+		/// <param name="enable"></param>
+		private void SetEnableStart(bool enable)
+		{
+			if (doButton.Dispatcher.CheckAccess())
+			{
+				doButton.IsEnabled = enable;
+				midiInCom.IsEnabled = enable;
+				midiInButton.IsEnabled = enable;
+				noteNum.IsEnabled = enable;
+			}
+			else
+			{
+				doButton.Dispatcher.Invoke(new Action<bool>(SetEnableStart), enable);
+			}
+		}
+
+		/// <summary>
+		/// 終了ボタンの有効無効を変更します。
+		/// </summary>
+		/// <param name="enable"></param>
+		private void SetEnableEnd(bool enable)
+		{
+			if (doButton.Dispatcher.CheckAccess())
+			{
+				stopButton.IsEnabled = false;
+			}
+			else
+			{
+				stopButton.Dispatcher.Invoke(new Action<bool>(SetEnableEnd), enable);
+			}
 		}
 
 		private void MidiInButton_Click(object sender, RoutedEventArgs e)
