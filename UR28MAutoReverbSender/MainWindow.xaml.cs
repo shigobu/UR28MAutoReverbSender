@@ -211,7 +211,7 @@ namespace UR28MAutoReverbSender
 			bool err = GetWindowRect(handle, out rect);
 			if (!err)
 			{
-				throw new Exception("dspMixFx_UR28Mの場所を取得できませんでした。\n「dspMixFx_UR28M」を起動してください。");
+				throw new Exception("dspMixFx_UR28Mの場所を取得できませんでした。\nアプリケーションの再起動をしてください。");
 			}
 
 			Microsoft.VisualBasic.Interaction.AppActivate(pro.Id);
@@ -232,7 +232,7 @@ namespace UR28MAutoReverbSender
 			bool err = GetWindowRect(handle, out rect);
 			if (!err)
 			{
-				throw new Exception("dspMixFx_UR28Mの場所を取得できませんでした。\n「dspMixFx_UR28M」を起動してください。");
+				throw new Exception("dspMixFx_UR28Mの場所を取得できませんでした。\nアプリケーションの再起動をしてください。");
 			}
 
 			Microsoft.VisualBasic.Interaction.AppActivate(pro.Id);
@@ -320,6 +320,37 @@ namespace UR28MAutoReverbSender
 			//MIDIデバイスの名前取得
 			midiInCom.ItemsSource = midiInDeviceEnum();
 			midiInCom.SelectedIndex = 0;
+		}
+
+		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			//設定ファイル書き込み
+			//exeパス取得
+			string thisAssemblyPath = Assembly.GetExecutingAssembly().Location;
+			//ディレクトリ取得
+			string thisAssemblyDirectory = Path.GetDirectoryName(thisAssemblyPath);
+			//設定ファイルパス作成
+			string settingFilePath = Path.Combine(thisAssemblyDirectory, "SettingData.txt");
+
+			StreamWriter sw = null;
+			try
+			{
+				//設定書き込み
+				sw = new StreamWriter(settingFilePath, false);
+				sw.WriteLine(midiInCom.SelectedIndex.ToString());
+				sw.WriteLine(noteNum.Text);
+			}
+			catch (Exception)
+			{
+				//何もしない
+			}
+			finally
+			{
+				if (sw != null)
+				{
+					sw.Close();
+				}
+			}
 		}
 	}
 
