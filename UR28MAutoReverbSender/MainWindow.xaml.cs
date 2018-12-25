@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.IO;
 
 namespace UR28MAutoReverbSender
 {
@@ -69,6 +71,29 @@ namespace UR28MAutoReverbSender
 			//MIDIデバイスの名前取得
 			midiInCom.ItemsSource = midiInDeviceEnum();
 			midiInCom.SelectedIndex = 0;
+
+			//設定ファイル読み込み
+			//exeパス取得
+			string thisAssemblyPath = Assembly.GetExecutingAssembly().Location;
+			//ディレクトリ取得
+			string thisAssemblyDirectory = Path.GetDirectoryName(thisAssemblyPath);
+			//設定ファイルパス作成
+			string settingFilePath = Path.Combine(thisAssemblyDirectory, "SettingData.txt");
+			if (File.Exists(settingFilePath))
+			{
+				try
+				{
+					//設定ファイル読み込み
+					string[] settingData = File.ReadAllLines(settingFilePath);
+					//設定
+					midiInCom.SelectedIndex = int.Parse(settingData[0]);
+					noteNum.Text = settingData[1];
+				}
+				catch (Exception)
+				{
+					//何もしない
+				}
+			}
 		}
 
 		/// <summary>
