@@ -268,6 +268,8 @@ namespace UR28MAutoReverbSender
 		{
 			//有効無効切り替え
 			SetEnableEnd(false);
+
+			//スレッド終了
 			tokenSource.Cancel();
 			while (MIDIMessageLoop.Status == TaskStatus.Running)
 			{
@@ -324,6 +326,19 @@ namespace UR28MAutoReverbSender
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
+			//スレッド終了
+			if (MIDIMessageLoop != null)
+			{
+				tokenSource.Cancel();
+				while (MIDIMessageLoop.Status == TaskStatus.Running)
+				{
+					Thread.Sleep(1);
+				}
+
+				MIDIMessageLoop.Dispose();
+				MIDIMessageLoop = null;
+			}
+
 			//設定ファイル書き込み
 			//exeパス取得
 			string thisAssemblyPath = Assembly.GetExecutingAssembly().Location;
