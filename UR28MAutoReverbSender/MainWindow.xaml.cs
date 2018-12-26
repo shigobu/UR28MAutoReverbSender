@@ -271,7 +271,7 @@ namespace UR28MAutoReverbSender
 
 			//スレッド終了
 			tokenSource.Cancel();
-			while (MIDIMessageLoop.Status == TaskStatus.Running)
+			while (!MIDIMessageLoop.IsCompleted)
 			{
 				Thread.Sleep(1);
 			}
