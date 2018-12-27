@@ -13,12 +13,12 @@
             <Button Content="更新" x:Name="midiInButton" Margin="3" Click="MidiInButton_Click"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <RadioButton x:Name="noteRadio" Content="NoteNumber" Width="100" VerticalAlignment="Center" Margin="3"/>
+            <RadioButton x:Name="noteRadio" GroupName="1" Content="NoteNumber" Width="100" VerticalAlignment="Center" Margin="3" IsChecked="True" Checked="radio_Checked"/>
             <TextBox x:Name="noteNum" Width="30" Margin="3"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <RadioButton x:Name="ccRadio" Content="ControlChange" Width="100" VerticalAlignment="Center" Margin="3"/>
-            <TextBox x:Name="ccNum" Width="30" Margin="3"/>
+            <RadioButton x:Name="ccRadio" GroupName="1" Content="ControlChange" Width="100" VerticalAlignment="Center" Margin="3" Checked="radio_Checked"/>
+            <TextBox x:Name="ccNum" Width="30" Margin="3" IsEnabled="False"/>
             <TextBlock Text="閾値64" VerticalAlignment="Center" Margin="3"/>
         </StackPanel>
         <DockPanel>
