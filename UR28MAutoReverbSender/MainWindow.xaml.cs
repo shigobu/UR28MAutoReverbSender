@@ -72,28 +72,8 @@ namespace UR28MAutoReverbSender
 			midiInCom.ItemsSource = midiInDeviceEnum();
 			midiInCom.SelectedIndex = 0;
 
-			//設定ファイル読み込み
-			//exeパス取得
-			string thisAssemblyPath = Assembly.GetExecutingAssembly().Location;
-			//ディレクトリ取得
-			string thisAssemblyDirectory = Path.GetDirectoryName(thisAssemblyPath);
-			//設定ファイルパス作成
-			string settingFilePath = Path.Combine(thisAssemblyDirectory, "SettingData.txt");
-			if (File.Exists(settingFilePath))
-			{
-				try
-				{
-					//設定ファイル読み込み
-					string[] settingData = File.ReadAllLines(settingFilePath);
-					//設定
-					midiInCom.SelectedIndex = int.Parse(settingData[0]);
-					noteNum.Text = settingData[1];
-				}
-				catch (Exception)
-				{
-					//何もしない
-				}
-			}
+			//読み込み
+			LoadData();
 		}
 
 		/// <summary>
@@ -392,34 +372,8 @@ namespace UR28MAutoReverbSender
 				MIDIMessageLoop.Dispose();
 				MIDIMessageLoop = null;
 			}
-
-			//設定ファイル書き込み
-			//exeパス取得
-			string thisAssemblyPath = Assembly.GetExecutingAssembly().Location;
-			//ディレクトリ取得
-			string thisAssemblyDirectory = Path.GetDirectoryName(thisAssemblyPath);
-			//設定ファイルパス作成
-			string settingFilePath = Path.Combine(thisAssemblyDirectory, "SettingData.txt");
-
-			StreamWriter sw = null;
-			try
-			{
-				//設定書き込み
-				sw = new StreamWriter(settingFilePath, false);
-				sw.WriteLine(midiInCom.SelectedIndex.ToString());
-				sw.WriteLine(noteNum.Text);
-			}
-			catch (Exception)
-			{
-				//何もしない
-			}
-			finally
-			{
-				if (sw != null)
-				{
-					sw.Close();
-				}
-			}
+			//保存
+			SaveData();
 		}
 
 		/// <summary>
@@ -437,6 +391,73 @@ namespace UR28MAutoReverbSender
 			else if (rb.Equals(ccRadio))
 			{
 				ccNum.IsEnabled = rb.IsChecked ?? ccNum.IsEnabled;
+			}
+		}
+
+		/// <summary>
+		/// 保存します。
+		/// </summary>
+		private void SaveData()
+		{
+			//設定ファイル書き込み
+			//exeパス取得
+			string thisAssemblyPath = Assembly.GetExecutingAssembly().Location;
+			//ディレクトリ取得
+			string thisAssemblyDirectory = Path.GetDirectoryName(thisAssemblyPath);
+			//設定ファイルパス作成
+			string settingFilePath = Path.Combine(thisAssemblyDirectory, "SettingData.txt");
+
+			StreamWriter sw = null;
+			try
+			{
+				//設定書き込み
+				sw = new StreamWriter(settingFilePath, false);
+				sw.WriteLine(midiInCom.SelectedIndex.ToString());
+				sw.WriteLine(noteNum.Text);
+				sw.WriteLine(ccRadio.IsChecked.ToString());
+				sw.WriteLine(ccNum.Text);
+			}
+			catch (Exception)
+			{
+				//何もしない
+			}
+			finally
+			{
+				if (sw != null)
+				{
+					sw.Close();
+				}
+			}
+		}
+
+		/// <summary>
+		/// 読み込みます。
+		/// </summary>
+		private void LoadData()
+		{
+			//設定ファイル読み込み
+			//exeパス取得
+			string thisAssemblyPath = Assembly.GetExecutingAssembly().Location;
+			//ディレクトリ取得
+			string thisAssemblyDirectory = Path.GetDirectoryName(thisAssemblyPath);
+			//設定ファイルパス作成
+			string settingFilePath = Path.Combine(thisAssemblyDirectory, "SettingData.txt");
+			if (File.Exists(settingFilePath))
+			{
+				try
+				{
+					//設定ファイル読み込み
+					string[] settingData = File.ReadAllLines(settingFilePath);
+					//設定
+					midiInCom.SelectedIndex = int.Parse(settingData[0]);
+					noteNum.Text = settingData[1];
+					ccRadio.IsChecked = bool.Parse(settingData[2]);
+					ccNum.Text = settingData[3];
+				}
+				catch (Exception)
+				{
+					//何もしない
+				}
 			}
 		}
 	}
