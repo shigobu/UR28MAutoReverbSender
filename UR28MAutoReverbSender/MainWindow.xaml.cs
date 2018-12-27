@@ -117,21 +117,57 @@ namespace UR28MAutoReverbSender
 					{
 						//ノートオン
 						case 0x90 + MIDIChannel:
-							//指定の音階の場合
-							if (message[1] == GetNoteNumber())
+							//ノートが選択されていた場合
+							if (noteRadio.IsChecked == true)
 							{
-								ReverbOn();
+								//指定の音階の場合
+								if (message[1] == GetNoteNumber())
+								{
+									//ベロシティーでOnかOffか判定
+									if (message[2] != 0)
+									{
+										ReverbOn();
+									}
+									else
+									{
+										ReverbOff();
+									}									
+								}
 							}
 							break;
 						//ノートオフ
 						case 0x80 + MIDIChannel:
-							//指定の音階の場合
-							if (message[1] == GetNoteNumber())
+							//ノートが選択されていた場合
+							if (noteRadio.IsChecked == true)
 							{
-								ReverbOff();
+								//指定の音階の場合
+								if (message[1] == GetNoteNumber())
+								{
+									ReverbOff();
+								}
 							}
 							break;
-
+						//コントロールチェンジ
+						case 0xB0 + MIDIChannel:
+							//コントロールチェンジ選択時
+							if (ccRadio.IsChecked == true)
+							{
+								//指定のCC番号の場合
+								if (message[1] == GetCCNumber())
+								{
+									//64以上の(63より多い)場合にOn
+									if (message[2] > 63)
+									{
+										ReverbOn();
+									}
+									else
+									{
+										ReverbOff();
+									}
+								}
+							}
+							break;
+							
 						default:
 							break;
 					}
@@ -184,6 +220,24 @@ namespace UR28MAutoReverbSender
 			else
 			{
 				return noteNum.Dispatcher.Invoke<int>(new Func<int>(GetNoteNumber));
+			}
+		}
+
+		/// <summary>
+		/// 入力されているコントロールチェンジ番号を取得します。
+		/// </summary>
+		/// <returns></returns>
+		private int GetCCNumber()
+		{
+			if (ccNum.Dispatcher.CheckAccess())
+			{
+				int num = 0;
+				int.TryParse(ccNum.Text, out num);
+				return num;
+			}
+			else
+			{
+				return ccNum.Dispatcher.Invoke<int>(new Func<int>(GetCCNumber));
 			}
 		}
 
@@ -248,10 +302,7 @@ namespace UR28MAutoReverbSender
 		{
 			//別スレッドを起動し、MIDIメッセージの読み込みを開始します。
 			//有効無効切り替え
-			doButton.IsEnabled = false;
-			midiInCom.IsEnabled = false;
-			midiInButton.IsEnabled = false;
-			noteNum.IsEnabled = false;
+			SetEnableStart(false);
 
 			//スレッド開始
 			tokenSource = new CancellationTokenSource();
@@ -261,7 +312,7 @@ namespace UR28MAutoReverbSender
 			{
 				Thread.Sleep(1);
 			}
-			stopButton.IsEnabled = true;
+			SetEnableEnd(true);
 		}
 
 		private void StopButton_Click(object sender, RoutedEventArgs e)
@@ -294,6 +345,9 @@ namespace UR28MAutoReverbSender
 				midiInCom.IsEnabled = enable;
 				midiInButton.IsEnabled = enable;
 				noteNum.IsEnabled = enable;
+				noteRadio.IsEnabled = enable;
+				ccNum.IsEnabled = enable;
+				ccRadio.IsEnabled = enable;
 			}
 			else
 			{
