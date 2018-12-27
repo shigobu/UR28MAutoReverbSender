@@ -13,10 +13,18 @@
             <Button Content="更新" x:Name="midiInButton" Margin="3" Click="MidiInButton_Click"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <TextBlock Text="NoteNumber" Margin="3" TextAlignment="Center" VerticalAlignment="Center"/>
-            <TextBox x:Name="noteNum" Width="60" Margin="3"/>
-            <Button x:Name="doButton" Content="開始" Margin="3" Click="DoButton_Click"/>
-            <Button x:Name="stopButton" Content="終了" Margin="3" Click="StopButton_Click" IsEnabled="False"/>
+            <RadioButton x:Name="noteRadio" Content="NoteNumber" Width="100" VerticalAlignment="Center" Margin="3"/>
+            <TextBox x:Name="noteNum" Width="30" Margin="3"/>
         </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <RadioButton x:Name="ccRadio" Content="ControlChange" Width="100" VerticalAlignment="Center" Margin="3"/>
+            <TextBox x:Name="ccNum" Width="30" Margin="3"/>
+            <TextBlock Text="閾値64" VerticalAlignment="Center" Margin="3"/>
+        </StackPanel>
+        <DockPanel>
+            <Button DockPanel.Dock="Right" x:Name="stopButton" Content="終了" Margin="3" Click="StopButton_Click" IsEnabled="False"/>
+            <Button DockPanel.Dock="Right" x:Name="doButton" Content="開始" Margin="3" Click="DoButton_Click"/>
+            <Rectangle/>
+        </DockPanel>
     </StackPanel>
 </Window>
