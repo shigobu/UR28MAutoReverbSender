@@ -343,7 +343,7 @@ namespace UR28MAutoReverbSender
 		{
 			if (doButton.Dispatcher.CheckAccess())
 			{
-				stopButton.IsEnabled = false;
+				stopButton.IsEnabled = enable;
 			}
 			else
 			{
@@ -383,15 +383,18 @@ namespace UR28MAutoReverbSender
 		/// <param name="e"></param>
 		private void radio_Checked(object sender, RoutedEventArgs e)
 		{
-			RadioButton rb = sender as RadioButton;
-			if (rb.Equals(noteRadio))
+			if (this.IsLoaded)
 			{
-				noteNum.IsEnabled = rb.IsChecked ?? noteNum.IsEnabled;
-			}
-			else if (rb.Equals(ccRadio))
-			{
-				ccNum.IsEnabled = rb.IsChecked ?? ccNum.IsEnabled;
-			}
+				RadioButton rb = sender as RadioButton;
+				if (rb.Equals(noteRadio))
+				{
+					noteNum.IsEnabled = rb.IsChecked ?? noteNum.IsEnabled;
+				}
+				else if (rb.Equals(ccRadio))
+				{
+					ccNum.IsEnabled = rb.IsChecked ?? ccNum.IsEnabled;
+				}
+			} 
 		}
 
 		/// <summary>
