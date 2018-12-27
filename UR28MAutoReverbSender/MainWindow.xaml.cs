@@ -449,23 +449,4 @@ namespace UR28MAutoReverbSender
 		public int Right;       // x position of lower-right corner
 		public int Bottom;      // y position of lower-right corner
 	}
-
-	/// <summary>
-	/// ボタンの拡張
-	/// </summary>
-	public static class ButtonExtensions
-	{
-		/// <summary>
-		/// ボタンのクリックイベントを発生させます。
-		/// </summary>
-		/// <param name="button"></param>
-		public static void PerformClick(this Button button)
-		{
-			if (button == null)
-				throw new ArgumentNullException("button");
-
-			var provider = new ButtonAutomationPeer(button) as IInvokeProvider;
-			provider.Invoke();
-		}
-	}
 }
