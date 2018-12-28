@@ -98,7 +98,7 @@ namespace UR28MAutoReverbSender
 						//ノートオン
 						case 0x90 + MIDIChannel:
 							//ノートが選択されていた場合
-							if (noteRadio.IsChecked == true)
+							if (GetNoteRadioIsChecked())
 							{
 								//指定の音階の場合
 								if (message[1] == GetNoteNumber())
@@ -118,7 +118,7 @@ namespace UR28MAutoReverbSender
 						//ノートオフ
 						case 0x80 + MIDIChannel:
 							//ノートが選択されていた場合
-							if (noteRadio.IsChecked == true)
+							if (GetNoteRadioIsChecked())
 							{
 								//指定の音階の場合
 								if (message[1] == GetNoteNumber())
@@ -130,7 +130,7 @@ namespace UR28MAutoReverbSender
 						//コントロールチェンジ
 						case 0xB0 + MIDIChannel:
 							//コントロールチェンジ選択時
-							if (ccRadio.IsChecked == true)
+							if (GetCCRadioIsChecked())
 							{
 								//指定のCC番号の場合
 								if (message[1] == GetCCNumber())
@@ -218,6 +218,38 @@ namespace UR28MAutoReverbSender
 			else
 			{
 				return ccNum.Dispatcher.Invoke<int>(new Func<int>(GetCCNumber));
+			}
+		}
+
+		/// <summary>
+		/// ノートラジオボタンのチェック状態を取得します。
+		/// </summary>
+		/// <returns></returns>
+		private bool GetNoteRadioIsChecked()
+		{
+			if (noteRadio.Dispatcher.CheckAccess())
+			{
+				return noteRadio.IsChecked ?? false;
+			}
+			else
+			{
+				return noteRadio.Dispatcher.Invoke<bool>(new Func<bool>(GetNoteRadioIsChecked));
+			}
+		}
+
+		/// <summary>
+		/// CCラジオボタンのチェック状態を取得します。
+		/// </summary>
+		/// <returns></returns>
+		private bool GetCCRadioIsChecked()
+		{
+			if (ccRadio.Dispatcher.CheckAccess())
+			{
+				return ccRadio.IsChecked ?? false;
+			}
+			else
+			{
+				return ccRadio.Dispatcher.Invoke<bool>(new Func<bool>(GetCCRadioIsChecked));
 			}
 		}
 
