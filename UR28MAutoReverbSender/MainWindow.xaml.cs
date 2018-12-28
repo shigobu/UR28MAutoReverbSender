@@ -253,6 +253,11 @@ namespace UR28MAutoReverbSender
 			}
 		}
 
+		/// <summary>
+		/// GetRadioIsCheckdeで使うデリゲート
+		/// </summary>
+		/// <param name="radioButton">ラジオボタン</param>
+		/// <returns></returns>
 		delegate bool GetRadioIsCheckedDelegate(RadioButton radioButton);
 		/// <summary>
 		/// ラジオボタンのチェック状態を取得します。
