@@ -12,7 +12,7 @@
             <ComboBox x:Name="midiInCom" Margin="3" Width="120"/>
             <Button Content="更新" x:Name="midiInButton" Margin="3" Click="MidiInButton_Click"/>
             <TextBlock Text="ch" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
-            <ComboBox x:Name="midiChCom" Margin="3" Width="30" SelectedIndex="0" SelectionChanged="ComboBox_SelectionChanged">
+            <ComboBox x:Name="midiChCom" Margin="3" Width="45" SelectedIndex="0" SelectionChanged="ComboBox_SelectionChanged">
                 <ComboBoxItem>1</ComboBoxItem>
                 <ComboBoxItem>2</ComboBoxItem>
                 <ComboBoxItem>3</ComboBoxItem>
