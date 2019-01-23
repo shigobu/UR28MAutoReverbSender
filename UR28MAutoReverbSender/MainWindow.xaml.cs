@@ -40,7 +40,7 @@ namespace UR28MAutoReverbSender
 		private Point OnPoint = new Point(40, 200);
 		private Point OffPoint = new Point(24, 210);
 
-		private const int MIDIChannel = 0;
+		private int MIDIChannel = 0;
 		private CancellationTokenSource tokenSource = null;
 		private CancellationToken token;
 
@@ -93,63 +93,61 @@ namespace UR28MAutoReverbSender
 						Thread.Sleep(1);
 						continue;
 					}
-					switch (message[0])
-					{
-						//ノートオン
-						case 0x90 + MIDIChannel:
-							//ノートが選択されていた場合
-							if (GetRadioIsCheckde(noteRadio))
+                    //midiメッセージ毎に分岐
+                    //ノートオン
+                    if (message[0] == 0x90 + MIDIChannel)
+                    {
+                        //ノートが選択されていた場合
+                        if (GetRadioIsCheckde(noteRadio))
+                        {
+                            //指定の音階の場合
+                            if (message[1] == GetNoteNumber())
+                            {
+                                //ベロシティーでOnかOffか判定
+                                if (message[2] != 0)
+                                {
+                                    ReverbOn();
+                                }
+                                else
+                                {
+                                    ReverbOff();
+                                }
+                            }
+                        }
+                    }
+                    //ノートオフ
+                    else if (message[0] == 0x80 + MIDIChannel)
+                    {
+                        //ノートが選択されていた場合
+                        if (GetRadioIsCheckde(noteRadio))
+                        {
+                            //指定の音階の場合
+                            if (message[1] == GetNoteNumber())
+                            {
+                                ReverbOff();
+                            }
+                        }
+                    }
+					//コントロールチェンジ
+                    else if(message[0] == 0xB0 + MIDIChannel)
+                    {
+						//コントロールチェンジ選択時
+						if (GetRadioIsCheckde(ccRadio))
+						{
+							//指定のCC番号の場合
+							if (message[1] == GetCCNumber())
 							{
-								//指定の音階の場合
-								if (message[1] == GetNoteNumber())
+								//64以上の(63より多い)場合にOn
+								if (message[2] > 63)
 								{
-									//ベロシティーでOnかOffか判定
-									if (message[2] != 0)
-									{
-										ReverbOn();
-									}
-									else
-									{
-										ReverbOff();
-									}									
+									ReverbOn();
 								}
-							}
-							break;
-						//ノートオフ
-						case 0x80 + MIDIChannel:
-							//ノートが選択されていた場合
-							if (GetRadioIsCheckde(noteRadio))
-							{
-								//指定の音階の場合
-								if (message[1] == GetNoteNumber())
+								else
 								{
 									ReverbOff();
 								}
 							}
-							break;
-						//コントロールチェンジ
-						case 0xB0 + MIDIChannel:
-							//コントロールチェンジ選択時
-							if (GetRadioIsCheckde(ccRadio))
-							{
-								//指定のCC番号の場合
-								if (message[1] == GetCCNumber())
-								{
-									//64以上の(63より多い)場合にOn
-									if (message[2] > 63)
-									{
-										ReverbOn();
-									}
-									else
-									{
-										ReverbOff();
-									}
-								}
-							}
-							break;
-							
-						default:
-							break;
+						}
 					}
 				}
 			}
@@ -384,6 +382,7 @@ namespace UR28MAutoReverbSender
 				noteRadio.IsEnabled = enable;
 				ccNum.IsEnabled = enable;
 				ccRadio.IsEnabled = enable;
+                midiChCom.IsEnabled = enable;
 			}
 			else
 			{
@@ -475,6 +474,7 @@ namespace UR28MAutoReverbSender
 				sw.WriteLine(noteNum.Text);
 				sw.WriteLine(ccRadio.IsChecked.ToString());
 				sw.WriteLine(ccNum.Text);
+                sw.WriteLine(midiChCom.SelectedIndex);
 			}
 			catch (Exception)
 			{
@@ -512,16 +512,28 @@ namespace UR28MAutoReverbSender
 					noteNum.Text = settingData[1];
 					ccRadio.IsChecked = bool.Parse(settingData[2]);
 					ccNum.Text = settingData[3];
+                    midiChCom.SelectedIndex = int.Parse(settingData[4]);
 				}
 				catch (Exception)
 				{
 					//何もしない
+                    //設定が適応されないだけ
 				}
 			}
 		}
-	}
 
-	[StructLayout(LayoutKind.Sequential)]
+        /// <summary>
+        /// チャンネル選択コンボボックスの選択状態が変わったときに発動する。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            MIDIChannel = ((ComboBox)sender).SelectedIndex;
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
 	public struct RECT
 	{
 		public int Left;        // x position of upper-left corner
