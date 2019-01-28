@@ -432,27 +432,6 @@ namespace UR28MAutoReverbSender
 		}
 
 		/// <summary>
-		/// ノート・CCラジオボタンチェック変更のイベントハンドラ
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void radio_Checked(object sender, RoutedEventArgs e)
-		{
-			if (this.IsLoaded)
-			{
-				RadioButton rb = sender as RadioButton;
-				if (rb.Equals(noteRadio))
-				{
-					noteNum.IsEnabled = rb.IsChecked ?? noteNum.IsEnabled;
-				}
-				else if (rb.Equals(ccRadio))
-				{
-					ccNum.IsEnabled = rb.IsChecked ?? ccNum.IsEnabled;
-				}
-			} 
-		}
-
-		/// <summary>
 		/// 保存します。
 		/// </summary>
 		private void SaveData()
