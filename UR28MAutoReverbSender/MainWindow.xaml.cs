@@ -293,7 +293,7 @@ namespace UR28MAutoReverbSender
                 //メッセージ出力
                 foreach (byte item in MIDIMessage)
                 {
-                    MIDIMessageText.Text = MIDIMessageText.Text + "0x" + item.ToString("x2");
+                    MIDIMessageText.Text = string.Format("{0}0x{1:x2} ", MIDIMessageText.Text, item);
                 }
             }
             else
