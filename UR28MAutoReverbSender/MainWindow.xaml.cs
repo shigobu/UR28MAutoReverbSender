@@ -153,6 +153,7 @@ namespace UR28MAutoReverbSender
 							}
 						}
 					}
+                    else {/*何もしない*/}
 				}
 			}
 			catch (Exception ex)
