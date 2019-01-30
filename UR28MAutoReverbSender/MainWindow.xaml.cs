@@ -374,9 +374,12 @@ namespace UR28MAutoReverbSender
 				Thread.Sleep(1);
 			}
 			SetEnableEnd(true);
-		}
 
-		private void StopButton_Click(object sender, RoutedEventArgs e)
+            //MIDIメッセージ出力テキスト変更
+            MIDIMessageText.Text = "開始";
+        }
+
+        private void StopButton_Click(object sender, RoutedEventArgs e)
 		{
 			//有効無効切り替え
 			SetEnableEnd(false);
@@ -392,6 +395,9 @@ namespace UR28MAutoReverbSender
 			MIDIMessageLoop = null;
 
 			SetEnableStart(true);
+
+            //MIDIメッセージ出力テキスト変更
+            MIDIMessageText.Text = "終了";
 		}
 
 		/// <summary>

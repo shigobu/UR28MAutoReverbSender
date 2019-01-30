@@ -5,14 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UR28MAutoReverbSender"
         mc:Ignorable="d"
-        Title="UR28M自動リバーブ" SizeToContent="WidthAndHeight" ResizeMode="NoResize" Loaded="Window_Loaded" Icon="icons/icon.ico" WindowStartupLocation="CenterScreen" Closing="Window_Closing">
+        Title="UR28M自動リバーブ" Width="300" SizeToContent="Height" ResizeMode="NoResize" Loaded="Window_Loaded" Icon="icons/icon.ico" WindowStartupLocation="CenterScreen" Closing="Window_Closing">
     <StackPanel Margin="5">
-        <StackPanel Orientation="Horizontal">
-            <TextBlock Text="MIDIIN" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
-            <ComboBox x:Name="midiInCom" Margin="3" Width="120"/>
-            <Button Content="更新" x:Name="midiInButton" Margin="3" Click="MidiInButton_Click"/>
-            <TextBlock Text="ch" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
-            <ComboBox x:Name="midiChCom" Margin="3" Width="45" SelectedIndex="0" SelectionChanged="ComboBox_SelectionChanged">
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Left" Text="MIDIIN" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
+            <ComboBox DockPanel.Dock="Right" x:Name="midiChCom" Margin="3" Width="45" SelectedIndex="0" SelectionChanged="ComboBox_SelectionChanged">
                 <ComboBoxItem>1</ComboBoxItem>
                 <ComboBoxItem>2</ComboBoxItem>
                 <ComboBoxItem>3</ComboBoxItem>
@@ -30,7 +27,10 @@
                 <ComboBoxItem>15</ComboBoxItem>
                 <ComboBoxItem>16</ComboBoxItem>
             </ComboBox>
-        </StackPanel>
+            <TextBlock DockPanel.Dock="Right" Text="ch" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
+            <Button DockPanel.Dock="Right" Content="更新" x:Name="midiInButton" Margin="3" Click="MidiInButton_Click"/>
+            <ComboBox x:Name="midiInCom" Margin="3"/>
+        </DockPanel>
         <StackPanel Orientation="Horizontal">
             <RadioButton x:Name="noteRadio" GroupName="1" Content="NoteNumber" Width="100" VerticalAlignment="Center" Margin="3" IsChecked="True"/>
             <TextBox x:Name="noteNum" Width="30" Margin="3"/>
