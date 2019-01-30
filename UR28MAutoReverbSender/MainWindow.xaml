@@ -43,7 +43,7 @@
         <DockPanel>
             <Button DockPanel.Dock="Right" x:Name="stopButton" Content="終了" Margin="3" Click="StopButton_Click" IsEnabled="False"/>
             <Button DockPanel.Dock="Right" x:Name="doButton" Content="開始" Margin="3" Click="DoButton_Click"/>
-            <Rectangle/>
+            <TextBlock x:Name="MIDIMessageText" Text="MIDIメッセージ" VerticalAlignment="Center" Margin="3"/>
         </DockPanel>
     </StackPanel>
 </Window>

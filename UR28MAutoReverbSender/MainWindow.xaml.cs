@@ -93,6 +93,10 @@ namespace UR28MAutoReverbSender
 						Thread.Sleep(1);
 						continue;
 					}
+
+                    //MIDIメッセージ表示
+                    PrintMIDIMessage(message);
+
                     //midiメッセージ毎に分岐
                     //ノートオン
                     if (message[0] == 0x90 + MIDIChannel)
@@ -275,11 +279,33 @@ namespace UR28MAutoReverbSender
 			}
 		}
 
-		/// <summary>
-		/// すべてのMIDIInデバイスの名前を取得します。
-		/// </summary>
-		/// <returns></returns>
-		private string[] midiInDeviceEnum()
+        /// <summary>
+        /// MIDIメッセージを表示します。
+        /// </summary>
+        /// <param name="MIDIMessage">MIDIメッセージ</param>
+        private void PrintMIDIMessage(byte[] MIDIMessage)
+        {
+            if (MIDIMessageText.Dispatcher.CheckAccess())
+            {
+                //テキストボックスをクリア
+                MIDIMessageText.Text = "";
+                //メッセージ出力
+                foreach (byte item in MIDIMessage)
+                {
+                    MIDIMessageText.Text = MIDIMessageText.Text + "0x" + item.ToString("x2");
+                }
+            }
+            else
+            {
+                MIDIMessageText.Dispatcher.Invoke(new Action<byte[]>(PrintMIDIMessage), MIDIMessage);
+            }
+        }
+
+        /// <summary>
+        /// すべてのMIDIInデバイスの名前を取得します。
+        /// </summary>
+        /// <returns></returns>
+        private string[] midiInDeviceEnum()
 		{
 			List<string> names = new List<string>();
 			int inNum = MIDIIN.GetDeviceNum();
