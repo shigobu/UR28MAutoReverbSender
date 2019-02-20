@@ -44,8 +44,6 @@ namespace UR28MAutoReverbSender
 		private CancellationTokenSource tokenSource = null;
 		private CancellationToken token;
 
-		private Task MIDIMessageLoop = null;
-
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -76,23 +74,25 @@ namespace UR28MAutoReverbSender
 			LoadData();
 		}
 
-		/// <summary>
-		/// MIDIメッセージを取得するスレッド
-		/// </summary>
+        /// <summary>
+        /// MIDIメッセージを取得するスレッド
+        /// </summary>
 		private void MIDILoadThread()
-		{
-			MIDIIN midiIn = null;
-			try
-			{
-				midiIn = new MIDIIN(GetSelectedDeviceName());
-				while (!token.IsCancellationRequested)
-				{
-					byte[] message = midiIn.GetMIDIMessage();
-					if (message.Length == 0)
-					{
-						Thread.Sleep(1);
-						continue;
-					}
+        {
+            SetEnableEnd(true);
+
+            MIDIIN midiIn = null;
+            try
+            {
+                midiIn = new MIDIIN(GetSelectedDeviceName());
+                while (!token.IsCancellationRequested)
+                {
+                    byte[] message = midiIn.GetMIDIMessage();
+                    if (message.Length == 0)
+                    {
+                        Thread.Sleep(1);
+                        continue;
+                    }
 
                     //MIDIメッセージ表示
                     PrintMIDIMessage(message);
@@ -132,51 +132,51 @@ namespace UR28MAutoReverbSender
                             }
                         }
                     }
-					//コントロールチェンジ
-                    else if(message[0] == 0xB0 + MIDIChannel)
+                    //コントロールチェンジ
+                    else if (message[0] == 0xB0 + MIDIChannel)
                     {
-						//コントロールチェンジ選択時
-						if (GetRadioIsCheckde(ccRadio))
-						{
-							//指定のCC番号の場合
-							if (message[1] == GetCCNumber())
-							{
-								//64以上の(63より多い)場合にOn
-								if (message[2] > 63)
-								{
-									ReverbOn();
-								}
-								else
-								{
-									ReverbOff();
-								}
-							}
-						}
-					}
+                        //コントロールチェンジ選択時
+                        if (GetRadioIsCheckde(ccRadio))
+                        {
+                            //指定のCC番号の場合
+                            if (message[1] == GetCCNumber())
+                            {
+                                //64以上の(63より多い)場合にOn
+                                if (message[2] > 63)
+                                {
+                                    ReverbOn();
+                                }
+                                else
+                                {
+                                    ReverbOff();
+                                }
+                            }
+                        }
+                    }
                     else {/*何もしない*/}
-				}
-			}
-			catch (Exception ex)
-			{
-				//有効無効切り替え
-				SetEnableEnd(false);
-				SetEnableStart(true);
-				MessageBox.Show(ex.Message, "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
-			}
-			finally
-			{
-				if (midiIn != null)
-				{
-					midiIn.Dispose();
-				}
-			}
-		}
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                if (midiIn != null)
+                {
+                    midiIn.Dispose();
+                }
+                //有効無効切り替え
+                SetEnableEnd(false);
+                SetEnableStart(true);
+            }
+        }
 
-		/// <summary>
-		/// 選択されているデバイス名を取得します。
-		/// </summary>
-		/// <returns></returns>
-		private string GetSelectedDeviceName()
+        /// <summary>
+        /// 選択されているデバイス名を取得します。
+        /// </summary>
+        /// <returns></returns>
+        private string GetSelectedDeviceName()
 		{
 			if (midiInCom.Dispatcher.CheckAccess())
 			{
@@ -359,21 +359,18 @@ namespace UR28MAutoReverbSender
 			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 		}
 
-		private void DoButton_Click(object sender, RoutedEventArgs e)
+		private async void DoButton_Click(object sender, RoutedEventArgs e)
 		{
 			//別スレッドを起動し、MIDIメッセージの読み込みを開始します。
 			//有効無効切り替え
 			SetEnableStart(false);
 
-			//スレッド開始
-			tokenSource = new CancellationTokenSource();
-			token = tokenSource.Token;
-			MIDIMessageLoop = Task.Run(new Action(MIDILoadThread), token);
-			while (!(MIDIMessageLoop.Status == TaskStatus.Running))
-			{
-				Thread.Sleep(1);
-			}
-			SetEnableEnd(true);
+            //スレッド開始
+            using (tokenSource = new CancellationTokenSource())
+            {
+				token = tokenSource.Token;
+                await Task.Run(new Action(MIDILoadThread), token);
+            }
 
             //MIDIメッセージ出力テキスト変更
             MIDIMessageText.Text = "開始";
@@ -381,30 +378,30 @@ namespace UR28MAutoReverbSender
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
 		{
-			//有効無効切り替え
-			SetEnableEnd(false);
-
-			//スレッド終了
-			tokenSource.Cancel();
-			while (!MIDIMessageLoop.IsCompleted)
-			{
-				Thread.Sleep(1);
-			}
-
-			MIDIMessageLoop.Dispose();
-			MIDIMessageLoop = null;
-
-			SetEnableStart(true);
+            //MIDIタスク終了
+            CancelMIDITask();
 
             //MIDIメッセージ出力テキスト変更
             MIDIMessageText.Text = "終了";
 		}
 
-		/// <summary>
-		/// 開始ボタンの有効無効を変更します。
-		/// </summary>
-		/// <param name="enable"></param>
-		private void SetEnableStart(bool enable)
+        /// <summary>
+        /// MIDI読み込みタスクにキャンセル要求をします。
+        /// </summary>
+        private void CancelMIDITask()
+        {
+            //スレッド終了
+            if (tokenSource != null)
+            {
+                tokenSource.Cancel();
+            }
+        }
+
+        /// <summary>
+        /// 開始ボタンの有効無効を変更します。
+        /// </summary>
+        /// <param name="enable"></param>
+        private void SetEnableStart(bool enable)
 		{
 			if (doButton.Dispatcher.CheckAccess())
 			{
@@ -448,20 +445,10 @@ namespace UR28MAutoReverbSender
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
-			//スレッド終了
-			if (MIDIMessageLoop != null)
-			{
-				tokenSource.Cancel();
-				while (MIDIMessageLoop.Status == TaskStatus.Running)
-				{
-					Thread.Sleep(1);
-				}
-
-				MIDIMessageLoop.Dispose();
-				MIDIMessageLoop = null;
-			}
-			//保存
-			SaveData();
+            //MIDIタスクをキャンセルします
+            CancelMIDITask();
+            //保存
+            SaveData();
 		}
 
 		/// <summary>
