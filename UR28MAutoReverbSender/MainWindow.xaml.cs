@@ -50,7 +50,7 @@ namespace UR28MAutoReverbSender
 		}
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
-		{/*
+		{
 			string processName = "dspMixFx_UR28M";
 			Process[] pros = Process.GetProcessesByName(processName);
 			foreach (var item in pros)
@@ -64,7 +64,7 @@ namespace UR28MAutoReverbSender
 				this.Close();
 				return;
 			}
-			handle = pro.MainWindowHandle;*/
+			handle = pro.MainWindowHandle;
 
 			//MIDIデバイスの名前取得
 			midiInCom.ItemsSource = midiInDeviceEnum();
