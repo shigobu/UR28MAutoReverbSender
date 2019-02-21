@@ -50,7 +50,7 @@ namespace UR28MAutoReverbSender
 		}
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
-		{
+		{/*
 			string processName = "dspMixFx_UR28M";
 			Process[] pros = Process.GetProcessesByName(processName);
 			foreach (var item in pros)
@@ -64,7 +64,7 @@ namespace UR28MAutoReverbSender
 				this.Close();
 				return;
 			}
-			handle = pro.MainWindowHandle;
+			handle = pro.MainWindowHandle;*/
 
 			//MIDIデバイスの名前取得
 			midiInCom.ItemsSource = midiInDeviceEnum();
@@ -156,15 +156,17 @@ namespace UR28MAutoReverbSender
                     else {/*何もしない*/}
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show(ex.Message, "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                //例外処理はメインスレッドで行う。そのため、呼び出し元に例外を再スロー。
+                throw;
             }
             finally
             {
                 if (midiIn != null)
                 {
                     midiIn.Dispose();
+                    midiIn = null;
                 }
                 //有効無効切り替え
                 SetEnableEnd(false);
@@ -359,6 +361,11 @@ namespace UR28MAutoReverbSender
 			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 		}
 
+        /// <summary>
+        /// 開始ボタンクリックイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
 		private async void DoButton_Click(object sender, RoutedEventArgs e)
 		{
 			//別スレッドを起動し、MIDIメッセージの読み込みを開始します。
@@ -369,20 +376,41 @@ namespace UR28MAutoReverbSender
             MIDIMessageText.Text = "開始";
 
             //スレッド開始
-            using (tokenSource = new CancellationTokenSource())
+            tokenSource = null;
+            try
             {
+                tokenSource = new CancellationTokenSource();
 				token = tokenSource.Token;
                 await Task.Run(new Action(MIDILoadThread), token);
             }
-        }
+            //別スレッドで発生した例外の処理
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                if (tokenSource != null)
+                {
+                    tokenSource.Dispose();
+                    //別メソッドでtokenSourceがnullかどうか参照しているので、nullの代入をする。
+                    tokenSource = null;
+                }
+            }
 
+            //MIDIメッセージ出力テキスト変更
+            MIDIMessageText.Text = "終了";
+        }
+        
+        /// <summary>
+        /// 終了ボタンクリックイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void StopButton_Click(object sender, RoutedEventArgs e)
 		{
             //MIDIタスク終了
             CancelMIDITask();
-
-            //MIDIメッセージ出力テキスト変更
-            MIDIMessageText.Text = "終了";
 		}
 
         /// <summary>
@@ -464,27 +492,14 @@ namespace UR28MAutoReverbSender
 			//設定ファイルパス作成
 			string settingFilePath = Path.Combine(thisAssemblyDirectory, "SettingData.txt");
 
-			StreamWriter sw = null;
-			try
+			using(StreamWriter sw = new StreamWriter(settingFilePath, false))
 			{
-				//設定書き込み
-				sw = new StreamWriter(settingFilePath, false);
+                //設定書き込み
 				sw.WriteLine(midiInCom.SelectedIndex.ToString());
 				sw.WriteLine(noteNum.Text);
 				sw.WriteLine(ccRadio.IsChecked.ToString());
 				sw.WriteLine(ccNum.Text);
                 sw.WriteLine(midiChCom.SelectedIndex);
-			}
-			catch (Exception)
-			{
-				//何もしない
-			}
-			finally
-			{
-				if (sw != null)
-				{
-					sw.Close();
-				}
 			}
 		}
 
